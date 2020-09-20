@@ -5,14 +5,17 @@ _gn()
     local cur prev words cword
     _init_completion || return
 
-    local i cmd
+    local i cmd cpos=0
     for ((i = 1; i < cword; i++)); do
         case "${words[i]}" in
             -*)
                 ;;
             *)
-                cmd=${words[i]}
-                break
+                if [[ -v cmd ]]; then
+                    (( cpos++ ))
+                else
+                    cmd=${words[i]}
+                fi
                 ;;
         esac
     done
@@ -21,7 +24,7 @@ _gn()
         case "$cur" in
             -*)
                 COMPREPLY=($(compgen -W "$($1 help switches | \
-                    grep -oP "^\s+\K[-\w]+(?=:)")" -- "$cur"))
+                    grep -oP '^\s+\K[-\w]+(?=:)')" -- "$cur"))
                 ;;
             *)
                 COMPREPLY=($(compgen -W "$($1 help | \
@@ -34,9 +37,10 @@ _gn()
 
     case "$cmd" in
         help)
-            COMPREPLY=($(compgen -W "$($1 help | \
-                sed '/^Other help topics/,/^$/!d' | \
-                grep -oP '^\s+\K\w+(?=:)')" -- "$cur"))
+            if [[ $cpos == 0 ]]; then
+                COMPREPLY=($(compgen -W "$($1 help | \
+                    grep -oP '^\s+\K\w+(?=:)')" -- "$cur"))
+            fi
             ;;
     esac
 } &&
