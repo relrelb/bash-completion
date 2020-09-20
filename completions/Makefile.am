@@ -568,6 +568,7 @@ CLEANFILES = \
 	gkrellm2 \
 	gmake \
 	gmplayer \
+	gn \
 	gnumake \
 	google-chrome \
 	google-chrome-stable \

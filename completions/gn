@@ -1,0 +1,24 @@
+# bash completion for gn                                   -*- shell-script -*-
+
+_gn()
+{
+    local cur prev words cword
+    _init_completion || return
+
+    case "$prev" in
+        $1)
+            COMPREPLY=($(compgen -W "$($1 help | sed '/^Commands/,/^$/!d' | \
+                grep -oP '^\s+\K\w+(?=:)')" -- "$cur"))
+            return
+            ;;
+        help)
+            COMPREPLY=($(compgen -W "$($1 help | \
+                sed '/^Other help topics/,/^$/!d' | \
+                grep -oP '^\s+\K\w+(?=:)')" -- "$cur"))
+            return
+            ;;
+    esac
+} &&
+    complete -F _gn gn
+
+# ex: filetype=sh
