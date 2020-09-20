@@ -5,17 +5,38 @@ _gn()
     local cur prev words cword
     _init_completion || return
 
-    case "$prev" in
-        $1)
-            COMPREPLY=($(compgen -W "$($1 help | sed '/^Commands/,/^$/!d' | \
-                grep -oP '^\s+\K\w+(?=:)')" -- "$cur"))
-            return
-            ;;
+    local i cmd
+    for ((i = 1; i < cword; i++)); do
+        case "${words[i]}" in
+            -*)
+                ;;
+            *)
+                cmd=${words[i]}
+                break
+                ;;
+        esac
+    done
+
+    if [[ ! -v cmd ]]; then
+        case "$cur" in
+            -*)
+                COMPREPLY=($(compgen -W "$($1 help switches | \
+                    grep -oP "^\s+\K[-\w]+(?=:)")" -- "$cur"))
+                ;;
+            *)
+                COMPREPLY=($(compgen -W "$($1 help | \
+                    sed '/^Commands/,/^$/!d' | \
+                    grep -oP '^\s+\K\w+(?=:)')" -- "$cur"))
+                ;;
+        esac
+        return
+    fi
+
+    case "$cmd" in
         help)
             COMPREPLY=($(compgen -W "$($1 help | \
                 sed '/^Other help topics/,/^$/!d' | \
                 grep -oP '^\s+\K\w+(?=:)')" -- "$cur"))
-            return
             ;;
     esac
 } &&
