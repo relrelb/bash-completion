@@ -7,42 +7,58 @@ _gn()
 
     local i cmd cpos=0
     for ((i = 1; i < cword; i++)); do
-        case "${words[i]}" in
-            -*)
-                ;;
-            *)
-                if [[ -v cmd ]]; then
-                    (( cpos++ ))
-                else
-                    cmd=${words[i]}
-                fi
-                ;;
-        esac
+        if [[ "${words[i]}" != -* ]]; then
+            if [[ -v cmd ]]; then
+                (( cpos++ ))
+            else
+                cmd=${words[i]}
+            fi
+        fi
     done
 
-    if [[ ! -v cmd ]]; then
-        case "$cur" in
-            -*)
-                COMPREPLY=($(compgen -W "$($1 help switches | \
-                    grep -oP '^\s+\K[-\w]+(?=:)')" -- "$cur"))
-                ;;
-            *)
-                COMPREPLY=($(compgen -W "$($1 help | \
-                    sed '/^Commands/,/^$/!d' | \
-                    grep -oP '^\s+\K\w+(?=:)')" -- "$cur"))
-                ;;
-        esac
-        return
+    local completions=()
+    if [[ "$cur" == -* ]]; then
+        completions+=($($1 help switches | grep -oP '^\s+\K[-\w]+(?=:)'))
+    elif [[ ! -v cmd ]]; then
+        completions+=($($1 help | sed '/^Commands/,/^$/!d' | \
+            grep -oP '^\s+\K\w+(?=:)'))
     fi
 
     case "$cmd" in
+        analyze)
+            ;;
+        args)
+            ;;
+        check)
+            ;;
+        clean)
+            ;;
+        desc)
+            ;;
+        format)
+            ;;
+        gen)
+            _filedir -d
+            return
+            ;;
         help)
             if [[ $cpos == 0 ]]; then
-                COMPREPLY=($(compgen -W "$($1 help | \
-                    grep -oP '^\s+\K\w+(?=:)')" -- "$cur"))
+                completions+=($($1 help | grep -oP '^\s+\K\w+(?=:)'))
             fi
             ;;
+        ls)
+            ;;
+        meta)
+            ;;
+        outputs)
+            ;;
+        path)
+            ;;
+        refs)
+            ;;
     esac
+
+    COMPREPLY=($(compgen -W '${completions[@]}' -- "$cur"))
 } &&
     complete -F _gn gn
 
